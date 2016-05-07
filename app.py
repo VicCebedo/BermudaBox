@@ -8,12 +8,7 @@ app = Flask(__name__)
 RESPONSE_INVALID_2FA = "Invalid 2FA."
 
 
-# TODO Make shell script that would help on constructing URL for REST queries
-# Like:
-# $ set 2fa = 523777
-# $ set method = DELETE
-# $ set user = test
-# $ do_curl
+# TODO Make AngularJS-based web interface, set user_name in cookie.
 
 
 # Get the secret of the user from db.
@@ -53,15 +48,6 @@ def get_message(user_name, totp_token, message_id):
     return str(message)
 
 
-# Add entry.
-@app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['POST'])
-def post_message(user_name, totp_token):
-    if not token_valid(user_name, totp_token):
-        # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
-    return 'post_message'
-
-
 # Delete entry.
 @app.route('/user/<user_name>/2fa/<totp_token>/message/<message_id>', methods=['DELETE'])
 def delete_message(user_name, totp_token, message_id):
@@ -80,6 +66,26 @@ def delete_all_messages(user_name, totp_token):
         return RESPONSE_INVALID_2FA
     dao_message.delete_all_messages(user_name)
     return 'Deleted all messages: ' + user_name
+
+
+# Add user.
+@app.route('/user/<user_name>/', methods=['POST'])
+def post_user(user_name):
+    # Check if already exists.
+    if dao_user.user_exists(user_name):
+        return "User already exists."
+
+    totp_secret = dao_user.create_user(user_name)
+    return "User created. TOTP Secret: " + totp_secret
+
+
+# TODO Add entry.
+@app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['POST'])
+def post_message(user_name, totp_token):
+    if not token_valid(user_name, totp_token):
+        # TODO Redirect to error code.
+        return RESPONSE_INVALID_2FA
+    return 'post_message'
 
 
 if __name__ == '__main__':

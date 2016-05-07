@@ -11,6 +11,25 @@ COLUMN_USER_NAME = "user_name"
 COLUMN_TOTP_SECRET = "totp_secret"
 
 
+# Check if user exists.
+def user_exists(user_name):
+    if user_name is None:
+        return False
+
+    # Get the client and db.
+    client = MongoClient(MONGO_HOST, MONGO_PORT)
+    db = client[MONGO_DB]
+    users = db[MONGO_COLLECTION]
+
+    # Do operation.
+    user = users.find_one({COLUMN_USER_NAME: user_name})
+    client.close()
+
+    if user is None:
+        return False
+    return True
+
+
 # Add a new entry.
 def create_user(user_name):
     # Get the client and db.
@@ -24,6 +43,7 @@ def create_user(user_name):
         user = {COLUMN_USER_NAME: user_name, COLUMN_TOTP_SECRET: totp_secret}
         users.insert_one(user).inserted_id
     client.close()
+    return totp_secret
 
 
 # Get secret.

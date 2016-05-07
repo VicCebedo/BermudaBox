@@ -7,6 +7,8 @@ MONGO_DB = "nomsg"
 MONGO_COLLECTION = "messages"
 
 COLUMN_ID = "_id"
+COLUMN_SENDER = "sender"
+COLUMN_CONTENT = "content"
 COLUMN_RECEIVER = "receiver"
 
 
@@ -71,3 +73,7 @@ def post_message(new_message):
     if new_message is not None:
         message_id = messages.insert_one(new_message).inserted_id
     client.close()
+
+
+    # msg = {COLUMN_SENDER: "vic", COLUMN_CONTENT: "helll23232ooo", COLUMN_RECEIVER: "test2"}
+    # post_message(msg)
