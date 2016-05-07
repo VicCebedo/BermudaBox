@@ -8,6 +8,14 @@ app = Flask(__name__)
 RESPONSE_INVALID_2FA = "Invalid 2FA."
 
 
+# TODO Make shell script that would help on constructing URL for REST queries
+# Like:
+# $ set 2fa = 523777
+# $ set method = DELETE
+# $ set user = test
+# $ do_curl
+
+
 # Get the secret of the user from db.
 # Check if the token is valid.
 def token_valid(user_name, totp_token):
@@ -60,7 +68,8 @@ def delete_message(user_name, totp_token, message_id):
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
         return RESPONSE_INVALID_2FA
-    return 'delete_message' + user_name + message_id
+    dao_message.delete_message(message_id)
+    return 'Deleted message: ' + user_name + ' ' + message_id
 
 
 # Delete all entries.
@@ -69,7 +78,8 @@ def delete_all_messages(user_name, totp_token):
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
         return RESPONSE_INVALID_2FA
-    return 'delete_all_messages' + user_name
+    dao_message.delete_all_messages(user_name)
+    return 'Deleted all messages: ' + user_name
 
 
 if __name__ == '__main__':

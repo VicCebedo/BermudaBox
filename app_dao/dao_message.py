@@ -24,27 +24,39 @@ def get_message_ids_by_receiver(receiver_id):
 
 
 # Get message.
-def get_message(object_id):
+def get_message(message_id):
     # Get the client and db.
     client = MongoClient(MONGO_HOST, MONGO_PORT)
     db = client[MONGO_DB]
     messages = db[MONGO_COLLECTION]
 
     # Do operation.
-    message = messages.find_one({COLUMN_ID: ObjectId(object_id)})
+    message = messages.find_one({COLUMN_ID: ObjectId(message_id)})
     client.close()
     return message
 
 
 # Delete an entry.
-def delete_message(object_id):
+def delete_message(message_id):
     # Get the client, db and collection.
     client = MongoClient(MONGO_HOST, MONGO_PORT)
     db = client[MONGO_DB]
     messages = db[MONGO_COLLECTION]
 
     # Do operation.
-    messages.delete_one({COLUMN_ID: ObjectId(object_id)})
+    messages.delete_one({COLUMN_ID: ObjectId(message_id)})
+    client.close()
+
+
+# Delete all entries.
+def delete_all_messages(user_name):
+    # Get the client, db and collection.
+    client = MongoClient(MONGO_HOST, MONGO_PORT)
+    db = client[MONGO_DB]
+    messages = db[MONGO_COLLECTION]
+
+    # Do operation.
+    messages.delete_many({COLUMN_RECEIVER: user_name})
     client.close()
 
 
