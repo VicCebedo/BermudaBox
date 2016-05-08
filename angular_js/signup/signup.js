@@ -8,7 +8,19 @@ angular.module('NoMsg.signup', ['ngRoute'])
     controller: 'SignupCtrl'
   });
 }])
+.controller('SignupCtrl', function($scope, $http){
 
-.controller('SignupCtrl', [function() {
+    // If the submit button is pressed.
+    $scope.submit = function() {
 
-}]);
+        // Send a POST to:
+        // @app.route('/user/<user_name>/', methods=['POST'])
+        var username = $scope.inputUsername;
+        var url = "http://localhost:5000/user/"+username+"/";
+
+        $http.post(url)
+        .then(function(response){
+            console.log(response);
+        });
+    };
+});

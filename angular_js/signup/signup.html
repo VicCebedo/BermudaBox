@@ -1,4 +1,5 @@
-<form action="/" id="formSignup">
+<div ng-controller="SignupCtrl">
     <input type="text" id="inputUsername" ng-model="inputUsername"/>
-    <input type="submit" id="inputSubmit"/>
-</form>
+    {{ inputUsername }}
+    <button id="buttonSubmit" ng-click="submit()">Sign Up</button>
+</div>
