@@ -2,8 +2,10 @@ import onetimepass as otp
 import app_dao.dao_message as dao_message
 import app_dao.dao_user as dao_user
 from flask import Flask, url_for
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 RESPONSE_INVALID_2FA = "Invalid 2FA."
 

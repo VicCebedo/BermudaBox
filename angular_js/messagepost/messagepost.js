@@ -1,9 +1,9 @@
 'use strict';
 
-angular.module('NoMsg.signup', ['ngRoute'])
+angular.module('NoMsg.message_post', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
-  $routeProvider.when('/signup', {
+  $routeProvider.when('/messagepost', {
     templateUrl: 'signup/signup.html',
     controller: 'SignupCtrl'
   });
