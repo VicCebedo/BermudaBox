@@ -5,7 +5,7 @@
             <div class="page-header">
                 <h1>Inbox</h1>
             </div>
-            {{ responseData }}<br/>
+            <h4>{{ responseText }}</h4>
             <form role="form">
                 <div class="form-group">
                     <label for="inputUsername">Username:</label>
@@ -18,5 +18,28 @@
             </form>
         </div>
         <div class="col-sm-4"></div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>ID</th>
+                    <th>Sender</th>
+                    <th>Content</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="row in responseData">
+                    <td>{{ row.datetime }}</td>
+                    <td>{{ row._id }}</td>
+                    <td>{{ row.sender }}</td>
+                    <td>{{ row.content }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

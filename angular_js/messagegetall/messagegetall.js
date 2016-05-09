@@ -20,7 +20,16 @@ angular.module('NoMsg.messagegetall', ['ngRoute'])
         var url = "http://127.0.0.1:5000/user/"+username+"/2fa/"+user2fa+"/message/";
         $http.get(url)
         .then(function(response){
-            $scope.responseData = response.data;
+            var responseData = response.data;
+
+            // If response was error,
+            // display the text rather than displaying the table.
+            if(responseData.indexOf("Error:") == -1){
+                $scope.responseText = "";
+                $scope.responseData = responseData;
+            } else {
+                $scope.responseText = responseData;
+            }
         });
     };
 });

@@ -1,16 +1,18 @@
-import json
 import onetimepass as otp
 import app_dao.dao_message as dao_message
 import app_dao.dao_user as dao_user
+from bson import json_util
 from flask import Flask, request
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-RESPONSE_INVALID_2FA = "Invalid 2FA."
-RESPONSE_N0_USER = "User does not exist."
-RESPONSE_POST_MESSAGE = "Posted message."
+ERROR_INVALID_2FA = "Error: Invalid 2FA."
+ERROR_N0_USER = "Error: User does not exist: "
+ERROR_USER_EXISTS = "Error: User already exists."
+SUCCESS_MESSAGE_SENT = "Message sent."
+SUCCESS_USER_CREATED = "User created. Secret Key: "
 
 
 # TODO Make AngularJS-based web interface, set user_name in cookie.
@@ -27,18 +29,18 @@ def token_valid(user_name, totp_token):
 # Get ID of entries.
 @app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['GET'])
 def get_all_messages(user_name, totp_token):
+    # Check if user exists.
+    if not dao_user.user_exists(user_name):
+        return ERROR_N0_USER + user_name
+
+    # Check 2FA.
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
+        return ERROR_INVALID_2FA
 
     # Fetch the ID's.
     message_ids = dao_message.get_all_messages(user_name)
-
-    # Convert the Cursor returned object to a list.
-    id_list = []
-    for message_id in message_ids:
-        id_list.append(message_id)
-    return json.dumps(str(id_list))
+    return json_util.dumps(message_ids)
 
 
 # Get entry.
@@ -46,7 +48,7 @@ def get_all_messages(user_name, totp_token):
 def get_message(user_name, totp_token, message_id):
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
+        return ERROR_INVALID_2FA
     message = dao_message.get_message(message_id)
     return str(message)
 
@@ -56,7 +58,7 @@ def get_message(user_name, totp_token, message_id):
 def delete_message(user_name, totp_token, message_id):
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
+        return ERROR_INVALID_2FA
     dao_message.delete_message(message_id)
     return 'Deleted message: ' + user_name + ' ' + message_id
 
@@ -66,7 +68,7 @@ def delete_message(user_name, totp_token, message_id):
 def delete_all_messages(user_name, totp_token):
     if not token_valid(user_name, totp_token):
         # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
+        return ERROR_INVALID_2FA
     dao_message.delete_all_messages(user_name)
     return 'Deleted all messages: ' + user_name
 
@@ -76,10 +78,10 @@ def delete_all_messages(user_name, totp_token):
 def post_user(user_name):
     # Check if already exists.
     if dao_user.user_exists(user_name):
-        return "User already exists."
+        return ERROR_USER_EXISTS
 
     totp_secret = dao_user.create_user(user_name)
-    return "User created. TOTP Secret: " + totp_secret
+    return SUCCESS_USER_CREATED + totp_secret
 
 
 # Add entry.
@@ -87,17 +89,21 @@ def post_user(user_name):
 def post_message(receiver_user_name, sender_user_name, totp_token):
     # Check if receiver exists.
     if not dao_user.user_exists(receiver_user_name):
-        return RESPONSE_N0_USER
+        return ERROR_N0_USER + receiver_user_name
+
+    # Check if sender exists.
+    if not dao_user.user_exists(sender_user_name):
+        return ERROR_N0_USER + sender_user_name
 
     # Check if valid 2FA.
     if not token_valid(sender_user_name, totp_token):
         # TODO Redirect to error code.
-        return RESPONSE_INVALID_2FA
+        return ERROR_INVALID_2FA
 
     # Do operation.
     content = request.data
     dao_message.post_message(sender_user_name, receiver_user_name, content)
-    return RESPONSE_POST_MESSAGE
+    return SUCCESS_MESSAGE_SENT
 
 
 # Add entry as anonymous.
@@ -105,12 +111,12 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
 def post_message_anon(receiver_user_name):
     # Check if receiver exists.
     if not dao_user.user_exists(receiver_user_name):
-        return RESPONSE_N0_USER
+        return ERROR_N0_USER
 
     # Do operation.
     content = request.data
     dao_message.post_message("anon", receiver_user_name, content)
-    return RESPONSE_POST_MESSAGE
+    return SUCCESS_MESSAGE_SENT
 
 
 if __name__ == '__main__':
