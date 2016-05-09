@@ -13,6 +13,7 @@ COLUMN_TOTP_SECRET = "totp_secret"
 
 # Check if user exists.
 def user_exists(user_name):
+    # TODO Check for reserved user names like "anon"
     if user_name is None:
         return False
 

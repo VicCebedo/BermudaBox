@@ -100,5 +100,18 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
     return RESPONSE_POST_MESSAGE
 
 
+# Add entry as anonymous.
+@app.route('/user/<receiver_user_name>/sender/anon/message/', methods=['POST'])
+def post_message_anon(receiver_user_name):
+    # Check if receiver exists.
+    if not dao_user.user_exists(receiver_user_name):
+        return RESPONSE_N0_USER
+
+    # Do operation.
+    content = request.data
+    dao_message.post_message("anon", receiver_user_name, content)
+    return RESPONSE_POST_MESSAGE
+
+
 if __name__ == '__main__':
     app.run()

@@ -18,8 +18,6 @@ angular.module('NoMsg.messagepost', ['ngRoute'])
         var receiver = $scope.inputReceiver;
         var content = $scope.inputContent;
 
-        var requestData = [{"inputSender":sender},{"input2fa":sender2fa},{"inputContent":content}]
-
         // @app.route('/user/<receiver_user_name>/sender/<sender_user_name>/2fa/<totp_token>/message/', methods=['POST'])
         var url = "http://127.0.0.1:5000/user/"+receiver+"/sender/"+sender+"/2fa/"+sender2fa+"/message/";
         $http.post(url, content)
