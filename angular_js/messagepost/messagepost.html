@@ -1,8 +1,28 @@
 <div ng-controller="MessagePostCtrl">
-    {{ responseData }}<br/>
-    Sender: <input type="text" id="inputSender" ng-model="inputSender"/><br/>
-    Receiver: <input type="text" id="inputReceiver" ng-model="inputReceiver"/><br/>
-    Content: <input type="text" id="inputContent" ng-model="inputContent"/><br/>
-    2FA: <input type="text" id="input2fa" ng-model="input2fa"/><br/>
-    <button id="buttonSubmit" ng-click="submit()">Post</button>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h1>Send Message</h1>
+            </div>
+            {{ responseData }}<br/>
+            <form role="form">
+                <div class="form-group">
+                    <label for="inputSender">Sender:</label>
+                    <input type="text" class="form-control" id="inputSender" ng-model="inputSender"/>
+
+                    <label for="inputReceiver">Receiver:</label>
+                    <input type="text" class="form-control" id="inputReceiver" ng-model="inputReceiver"/>
+
+                    <label for="inputContent">Content:</label>
+                    <input type="text" class="form-control" id="inputContent" ng-model="inputContent"/>
+
+                    <label for="input2fa">2FA:</label>
+                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa"/>
+                </div>
+                <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">Send</button>
+            </form>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 </div>

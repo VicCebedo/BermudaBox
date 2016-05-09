@@ -1,6 +1,19 @@
 <div ng-controller="SignupCtrl">
-    {{ responseData }}<br/>
-    <input type="text" id="inputUsername" ng-model="inputUsername"/>
-    {{ inputUsername }}
-    <button id="buttonSubmit" ng-click="submit()">Sign Up</button>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h1>Sign Up</h1>
+            </div>
+            {{ responseData }}<br/>
+            <form role="form">
+                <div class="form-group">
+                    <label for="inputUsername">Username:</label>
+                    <input type="text" class="form-control" id="inputUsername" ng-model="inputUsername"/>
+                </div>
+                <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">Sign Up</button>
+            </form>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 </div>

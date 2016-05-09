@@ -1,12 +1,22 @@
 <div ng-controller="MessageGetAllCtrl">
-    Username: <input type="text" id="inputUsername" ng-model="inputUsername"/><br/>
-    2FA: <input type="text" id="input2fa" ng-model="input2fa"/><br/>
-    <button id="buttonSubmit" ng-click="submit()">Get All</button><br/>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <div class="page-header">
+                <h1>Inbox</h1>
+            </div>
+            {{ responseData }}<br/>
+            <form role="form">
+                <div class="form-group">
+                    <label for="inputUsername">Username:</label>
+                    <input type="text" class="form-control" id="inputUsername" ng-model="inputUsername"/>
 
-    {{ responseData }}
-    <lu>
-        <li ng-repeat="resp in responseData track by _id">
-            {{ resp._id }}
-        </li>
-    </lu>
+                    <label for="input2fa">2FA:</label>
+                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa"/>
+                </div>
+                <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">View Messages</button>
+            </form>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
 </div>

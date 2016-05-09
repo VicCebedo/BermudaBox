@@ -1,20 +1,36 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>NoMsg</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 </head>
 
 <body ng-app="NoMsg">
 
-<a href="#home">Home</a>
-<a href="#signup">Sign Up</a>
-<a href="#messagepost">Send Message</a>
-<a href="#messagegetall">Inbox</a>
-<div ng-view></div>
+<nav class="navbar navbar-default">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">WebSiteName</a>
+    </div>
+    <ul class="nav navbar-nav">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#signup">Sign Up</a></li>
+        <li><a href="#messagepost">Send Message</a></li>
+        <li><a href="#messagegetall">Inbox</a></li>
+    </ul>
+</nav>
+<div class="container-fluid">
+    <div ng-view></div>
+</div>
 
 <!--Angular deps-->
 <script src="angular.js"></script>
@@ -27,5 +43,13 @@
 <script src="messagepost/messagepost.js"></script>
 <script src="messagegetall/messagegetall.js"></script>
 
+<!-- Latest compiled and minified JavaScript -->
+<script
+        src="http://code.jquery.com/jquery-1.12.3.min.js"
+        integrity="sha256-aaODHAgvwQW1bFOGXMeX+pC4PZIPsvn2h1sArYOhgXQ="
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
 </body>
 </html>
