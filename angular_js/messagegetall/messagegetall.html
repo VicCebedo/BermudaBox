@@ -1,0 +1,12 @@
+<div ng-controller="MessageGetAllCtrl">
+    Username: <input type="text" id="inputUsername" ng-model="inputUsername"/><br/>
+    2FA: <input type="text" id="input2fa" ng-model="input2fa"/><br/>
+    <button id="buttonSubmit" ng-click="submit()">Get All</button><br/>
+
+    {{ responseData }}
+    <lu>
+        <li ng-repeat="resp in responseData track by _id">
+            {{ resp._id }}
+        </li>
+    </lu>
+</div>

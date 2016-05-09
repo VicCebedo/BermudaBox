@@ -1,3 +1,4 @@
+import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
@@ -10,17 +11,19 @@ COLUMN_ID = "_id"
 COLUMN_SENDER = "sender"
 COLUMN_CONTENT = "content"
 COLUMN_RECEIVER = "receiver"
+COLUMN_DATE_TIME = "datetime"
 
 
 # Get message ID's.
-def get_message_ids_by_receiver(receiver_id):
+def get_all_messages(receiver_id):
     # Get the client and db.
     client = MongoClient(MONGO_HOST, MONGO_PORT)
     db = client[MONGO_DB]
     messages = db[MONGO_COLLECTION]
 
     # Do operation.
-    message = messages.find({COLUMN_RECEIVER: receiver_id}, {COLUMN_ID: 1})
+    message = messages.find({COLUMN_RECEIVER: receiver_id},
+                            {COLUMN_ID: 1, COLUMN_SENDER: 1, COLUMN_DATE_TIME: 1, COLUMN_CONTENT: 1})
     client.close()
     return message
 
@@ -63,7 +66,10 @@ def delete_all_messages(user_name):
 
 
 # Add a new entry.
-def post_message(new_message):
+def post_message(sender, receiver, content):
+    new_message = {COLUMN_SENDER: sender, COLUMN_CONTENT: content, COLUMN_RECEIVER: receiver,
+                   COLUMN_DATE_TIME: datetime.datetime.utcnow()}
+
     # Get the client and db.
     client = MongoClient(MONGO_HOST, MONGO_PORT)
     db = client[MONGO_DB]
@@ -73,7 +79,3 @@ def post_message(new_message):
     if new_message is not None:
         message_id = messages.insert_one(new_message).inserted_id
     client.close()
-
-
-    # msg = {COLUMN_SENDER: "vic", COLUMN_CONTENT: "helll23232ooo", COLUMN_RECEIVER: "test2"}
-    # post_message(msg)

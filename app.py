@@ -1,13 +1,16 @@
+import json
 import onetimepass as otp
 import app_dao.dao_message as dao_message
 import app_dao.dao_user as dao_user
-from flask import Flask, url_for
+from flask import Flask, request
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
 RESPONSE_INVALID_2FA = "Invalid 2FA."
+RESPONSE_N0_USER = "User does not exist."
+RESPONSE_POST_MESSAGE = "Posted message."
 
 
 # TODO Make AngularJS-based web interface, set user_name in cookie.
@@ -29,15 +32,13 @@ def get_all_messages(user_name, totp_token):
         return RESPONSE_INVALID_2FA
 
     # Fetch the ID's.
-    message_ids = dao_message.get_message_ids_by_receiver(user_name)
+    message_ids = dao_message.get_all_messages(user_name)
 
     # Convert the Cursor returned object to a list.
     id_list = []
     for message_id in message_ids:
         id_list.append(message_id)
-
-    # Return the list.
-    return str(id_list)
+    return json.dumps(str(id_list))
 
 
 # Get entry.
@@ -81,13 +82,22 @@ def post_user(user_name):
     return "User created. TOTP Secret: " + totp_secret
 
 
-# TODO Add entry.
-@app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['POST'])
-def post_message(user_name, totp_token):
-    if not token_valid(user_name, totp_token):
+# Add entry.
+@app.route('/user/<receiver_user_name>/sender/<sender_user_name>/2fa/<totp_token>/message/', methods=['POST'])
+def post_message(receiver_user_name, sender_user_name, totp_token):
+    # Check if receiver exists.
+    if not dao_user.user_exists(receiver_user_name):
+        return RESPONSE_N0_USER
+
+    # Check if valid 2FA.
+    if not token_valid(sender_user_name, totp_token):
         # TODO Redirect to error code.
         return RESPONSE_INVALID_2FA
-    return 'post_message'
+
+    # Do operation.
+    content = request.data
+    dao_message.post_message(sender_user_name, receiver_user_name, content)
+    return RESPONSE_POST_MESSAGE
 
 
 if __name__ == '__main__':
