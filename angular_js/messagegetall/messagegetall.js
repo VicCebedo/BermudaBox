@@ -11,6 +11,21 @@ angular.module('NoMsg.messagegetall', ['ngRoute'])
 .controller('InboxCtrl', function($scope, $http){
 
     // If the delete button is pressed.
+    $scope.delete = function(messageID) {
+        var user2fa = $scope.input2fa;
+        var username = $scope.inputUsername;
+
+        // @app.route('/user/<user_name>/2fa/<totp_token>/message/<message_id>', methods=['DELETE'])
+        var url = "http://127.0.0.1:5000/user/"+username+"/2fa/"+user2fa+"/message/"+messageID;
+        $http.delete(url)
+        .then(function(response){
+            var responseData = response.data;
+            $scope.responseText = responseData;
+            $scope.responseData = "";
+        });
+    };
+
+    // If the delete all button is pressed.
     $scope.deleteAll = function() {
         var user2fa = $scope.input2fa;
         var username = $scope.inputUsername;

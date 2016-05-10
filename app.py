@@ -11,8 +11,11 @@ CORS(app)
 ERROR_INVALID_2FA = "Error: Invalid 2FA."
 ERROR_N0_USER = "Error: User does not exist: "
 ERROR_USER_EXISTS = "Error: User already exists."
+
 SUCCESS_MESSAGE_SENT = "Message sent."
 SUCCESS_USER_CREATED = "User created. Secret Key: "
+SUCCESS_MESSAGE_DELETE = "Deleted message."
+SUCCESS_MESSAGE_DELETE_ALL = "Deleted all messages: "
 
 
 # TODO Make AngularJS-based web interface, set user_name in cookie.
@@ -60,7 +63,7 @@ def delete_message(user_name, totp_token, message_id):
         # TODO Redirect to error code.
         return ERROR_INVALID_2FA
     dao_message.delete_message(message_id)
-    return 'Deleted message: ' + user_name + ' ' + message_id
+    return SUCCESS_MESSAGE_DELETE
 
 
 # Delete all entries.
@@ -70,7 +73,7 @@ def delete_all_messages(user_name, totp_token):
         # TODO Redirect to error code.
         return ERROR_INVALID_2FA
     dao_message.delete_all_messages(user_name)
-    return 'Deleted all messages: ' + user_name
+    return SUCCESS_MESSAGE_DELETE_ALL + user_name
 
 
 # Add user.
