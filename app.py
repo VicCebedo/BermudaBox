@@ -101,7 +101,7 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
         return ERROR_INVALID_2FA
 
     # Do operation.
-    content = request.data
+    content = json_util.Binary.decode(request.data)
     dao_message.post_message(sender_user_name, receiver_user_name, content)
     return SUCCESS_MESSAGE_SENT
 
