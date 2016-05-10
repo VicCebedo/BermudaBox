@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('NoMsg.signup', ['ngRoute'])
+angular.module('NoMsg.signup', ['ngRoute', 'vcRecaptcha'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/signup', {
@@ -8,19 +8,56 @@ angular.module('NoMsg.signup', ['ngRoute'])
     controller: 'SignupCtrl'
   });
 }])
-.controller('SignupCtrl', function($scope, $http){
+.controller('SignupCtrl', function($scope, $http, vcRecaptchaService){
+
+    $scope.response = null;
+    $scope.widgetId = null;
+    $scope.model = {
+        key: '6LcQgx8TAAAAAJ8zw9g5mDg8YQX_znHo_v7S7xM4'
+    };
+
+    $scope.setResponse = function (response) {
+        console.info('Response available');
+        $scope.response = response;
+    };
+
+    $scope.setWidgetId = function (widgetId) {
+        console.info('Created widget ID: %s', widgetId);
+        $scope.widgetId = widgetId;
+    };
+
+    $scope.cbExpiration = function() {
+        console.info('Captcha expired. Resetting response object');
+        vcRecaptchaService.reload($scope.widgetId);
+        $scope.response = null;
+    };
 
     // If the submit button is pressed.
     $scope.submit = function() {
 
-        // Send a POST to:
-        // @app.route('/user/<user_name>/', methods=['POST'])
-        var username = $scope.inputUsername;
-        var url = "http://127.0.0.1:5000/user/"+username+"/";
+        //URL: https://www.google.com/recaptcha/api/siteverify
+        //secret (required)
+        //response (required)
 
-        $http.post(url)
+        // Check if the captcha was legit.
+        var captchaData = [{"secret":"6LcQgx8TAAAAAGirYHjHNN7XOAGUN0q9okWmTnWD"}, {"response":$scope.response}];
+        $http.post("http://127.0.0.1:5000/recaptcha/siteverify", captchaData)
         .then(function(response){
-            $scope.responseData = response.data;
+
+            // If recaptcha was valid.
+            if(response.data == "true"){
+                // Send a POST to:
+                // @app.route('/user/<user_name>/', methods=['POST'])
+                var username = $scope.inputUsername;
+                var url = "http://127.0.0.1:5000/user/"+username+"/";
+
+                $http.post(url)
+                .then(function(response){
+                    $scope.responseData = response.data;
+                });
+            } else {
+                vcRecaptchaService.reload($scope.widgetId);
+            }
         });
     };
 });

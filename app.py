@@ -1,3 +1,4 @@
+import requests
 import onetimepass as otp
 import app_dao.dao_message as dao_message
 import app_dao.dao_user as dao_user
@@ -19,7 +20,6 @@ SUCCESS_MESSAGE_DELETE_ALL = "Deleted all messages: "
 
 
 # TODO Make AngularJS-based web interface, set user_name in cookie.
-
 
 # Get the secret of the user from db.
 # Check if the token is valid.
@@ -44,6 +44,22 @@ def get_all_messages(user_name, totp_token):
     # Fetch the ID's.
     message_ids = dao_message.get_all_messages(user_name)
     return json_util.dumps(message_ids)
+
+
+# Verify recaptcha.
+@app.route('/recaptcha/siteverify', methods=['POST'])
+def recaptcha_verify():
+    requestData = request.data
+
+    # TODO Find a better way of extracting data from request.
+    secret = request.json[0].get('secret')
+    response = request.json[1].get('response')
+
+    # Verify in google.
+    googleResponse = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                                   data={'secret': secret, 'response': response})
+    success = json_util.loads(googleResponse.text)['success']
+    return str(success).lower()
 
 
 # Get entry.

@@ -10,6 +10,13 @@
                 <div class="form-group">
                     <label for="inputUsername">Username:</label>
                     <input type="text" class="form-control" id="inputUsername" ng-model="inputUsername"/>
+                    <br/>
+                    <div vc-recaptcha
+                         theme="'light'"
+                         key="model.key"
+                         on-create="setWidgetId(widgetId)"
+                         on-success="setResponse(response)"
+                         on-expire="cbExpiration()"></div>
                 </div>
                 <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">Sign Up</button>
             </form>
