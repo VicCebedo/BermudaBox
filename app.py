@@ -12,14 +12,13 @@ CORS(app)
 ERROR_INVALID_2FA = "Error: Invalid 2FA."
 ERROR_N0_USER = "Error: User does not exist: "
 ERROR_USER_EXISTS = "Error: User already exists."
+ERROR_INVALID_RECAPTCHA = "Error: reCAPTCHA not valid."
 
 SUCCESS_MESSAGE_SENT = "Message sent."
 SUCCESS_USER_CREATED = "User created. Secret Key: "
 SUCCESS_MESSAGE_DELETE = "Deleted message."
 SUCCESS_MESSAGE_DELETE_ALL = "Deleted all messages: "
 
-
-# TODO Make AngularJS-based web interface, set user_name in cookie.
 
 # Get the secret of the user from db.
 # Check if the token is valid.
@@ -47,19 +46,27 @@ def get_all_messages(user_name, totp_token):
 
 
 # Verify recaptcha.
-@app.route('/recaptcha/siteverify', methods=['POST'])
-def recaptcha_verify():
-    requestData = request.data
-
+@app.route('/user/<user_name>/', methods=['POST'])
+def post_user(user_name):
     # TODO Find a better way of extracting data from request.
     secret = request.json[0].get('secret')
     response = request.json[1].get('response')
 
     # Verify in google.
-    googleResponse = requests.post('https://www.google.com/recaptcha/api/siteverify',
-                                   data={'secret': secret, 'response': response})
-    success = json_util.loads(googleResponse.text)['success']
-    return str(success).lower()
+    google_response = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                                    data={'secret': secret, 'response': response})
+    success = json_util.loads(google_response.text)['success']
+
+    # If success, create a new user.
+    if success:
+        # Check if already exists.
+        if dao_user.user_exists(user_name):
+            return ERROR_USER_EXISTS
+
+        totp_secret = dao_user.create_user(user_name)
+        return SUCCESS_USER_CREATED + totp_secret
+
+    return ERROR_INVALID_RECAPTCHA
 
 
 # Get entry.
@@ -92,17 +99,6 @@ def delete_all_messages(user_name, totp_token):
     return SUCCESS_MESSAGE_DELETE_ALL + user_name
 
 
-# Add user.
-@app.route('/user/<user_name>/', methods=['POST'])
-def post_user(user_name):
-    # Check if already exists.
-    if dao_user.user_exists(user_name):
-        return ERROR_USER_EXISTS
-
-    totp_secret = dao_user.create_user(user_name)
-    return SUCCESS_USER_CREATED + totp_secret
-
-
 # Add entry.
 @app.route('/user/<receiver_user_name>/sender/<sender_user_name>/2fa/<totp_token>/message/', methods=['POST'])
 def post_message(receiver_user_name, sender_user_name, totp_token):
@@ -126,16 +122,16 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
 
 
 # Add entry as anonymous.
-@app.route('/user/<receiver_user_name>/sender/anon/message/', methods=['POST'])
-def post_message_anon(receiver_user_name):
-    # Check if receiver exists.
-    if not dao_user.user_exists(receiver_user_name):
-        return ERROR_N0_USER
-
-    # Do operation.
-    content = request.data
-    dao_message.post_message("anon", receiver_user_name, content)
-    return SUCCESS_MESSAGE_SENT
+# @app.route('/user/<receiver_user_name>/sender/anon/message/', methods=['POST'])
+# def post_message_anon(receiver_user_name):
+#     # Check if receiver exists.
+#     if not dao_user.user_exists(receiver_user_name):
+#         return ERROR_N0_USER
+#
+#     # Do operation.
+#     content = request.data
+#     dao_message.post_message("anon", receiver_user_name, content)
+#     return SUCCESS_MESSAGE_SENT
 
 
 if __name__ == '__main__':

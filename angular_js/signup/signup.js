@@ -40,24 +40,13 @@ angular.module('NoMsg.signup', ['ngRoute', 'vcRecaptcha'])
         //response (required)
 
         // Check if the captcha was legit.
+        var url = "http://127.0.0.1:5000/user/"+$scope.inputUsername+"/"
         var captchaData = [{"secret":"6LcQgx8TAAAAAGirYHjHNN7XOAGUN0q9okWmTnWD"}, {"response":$scope.response}];
-        $http.post("http://127.0.0.1:5000/recaptcha/siteverify", captchaData)
+        $http.post(url, captchaData)
         .then(function(response){
-
-            // If recaptcha was valid.
-            if(response.data == "true"){
-                // Send a POST to:
-                // @app.route('/user/<user_name>/', methods=['POST'])
-                var username = $scope.inputUsername;
-                var url = "http://127.0.0.1:5000/user/"+username+"/";
-
-                $http.post(url)
-                .then(function(response){
-                    $scope.responseData = response.data;
-                });
-            } else {
-                vcRecaptchaService.reload($scope.widgetId);
-            }
+            // Display text response.
+            vcRecaptchaService.reload($scope.widgetId);
+            $scope.responseData = response.data;
         });
     };
 });
