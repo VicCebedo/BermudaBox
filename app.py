@@ -1,5 +1,5 @@
 import requests
-import onetimepass as otp
+import validator as validator
 import app_dao.dao_message as dao_message
 import app_dao.dao_user as dao_user
 from bson import json_util
@@ -13,6 +13,8 @@ ERROR_INVALID_2FA = "Error: Invalid 2FA."
 ERROR_N0_USER = "Error: User does not exist: "
 ERROR_USER_EXISTS = "Error: User already exists."
 ERROR_INVALID_RECAPTCHA = "Error: reCAPTCHA not valid."
+ERROR_VALIDATION = "Error: Input not valid."
+NOTE_INBOX_EMPTY = "Note: Inbox is empty."
 
 SUCCESS_MESSAGE_SENT = "Message sent."
 SUCCESS_USER_CREATED = "User created. Secret Key: "
@@ -20,34 +22,36 @@ SUCCESS_MESSAGE_DELETE = "Deleted message."
 SUCCESS_MESSAGE_DELETE_ALL = "Deleted all messages: "
 
 
-# Get the secret of the user from db.
-# Check if the token is valid.
-def token_valid(user_name, totp_token):
-    totp_secret = dao_user.get_user_secret(user_name)
-    token_valid = otp.valid_totp(totp_token, totp_secret)
-    return token_valid
-
-
-# Get ID of entries.
+# Get the inbox.
 @app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['GET'])
 def get_all_messages(user_name, totp_token):
+    # Input validation.
+    if not (validator.user_name_valid(user_name)
+            and validator.totp_valid(totp_token)):
+        return ERROR_VALIDATION
+
     # Check if user exists.
     if not dao_user.user_exists(user_name):
         return ERROR_N0_USER + user_name
 
     # Check 2FA.
-    if not token_valid(user_name, totp_token):
-        # TODO Redirect to error code.
+    if not validator.alive_token(user_name, totp_token):
         return ERROR_INVALID_2FA
 
     # Fetch the ID's.
-    message_ids = dao_message.get_all_messages(user_name)
-    return json_util.dumps(message_ids)
+    messages = dao_message.get_all_messages(user_name)
+    if (messages.count() > 0):
+        return json_util.dumps(messages)
+    return NOTE_INBOX_EMPTY
 
 
-# Verify recaptcha.
+# Verify recaptcha then create user.
 @app.route('/user/<user_name>/', methods=['POST'])
-def post_user(user_name):
+def create_user(user_name):
+    # Input validation.
+    if not validator.user_name_valid(user_name):
+        return ERROR_VALIDATION
+
     # TODO Find a better way of extracting data from request.
     secret = request.json[0].get('secret')
     response = request.json[1].get('response')
@@ -69,22 +73,20 @@ def post_user(user_name):
     return ERROR_INVALID_RECAPTCHA
 
 
-# Get entry.
-@app.route('/user/<user_name>/2fa/<totp_token>/message/<message_id>', methods=['GET'])
-def get_message(user_name, totp_token, message_id):
-    if not token_valid(user_name, totp_token):
-        # TODO Redirect to error code.
-        return ERROR_INVALID_2FA
-    message = dao_message.get_message(message_id)
-    return str(message)
-
-
 # Delete entry.
 @app.route('/user/<user_name>/2fa/<totp_token>/message/<message_id>', methods=['DELETE'])
 def delete_message(user_name, totp_token, message_id):
-    if not token_valid(user_name, totp_token):
-        # TODO Redirect to error code.
+    # Input validation.
+    if not (validator.user_name_valid(user_name)
+            and validator.totp_valid(totp_token)
+            and validator.message_id_valid(message_id)):
+        return ERROR_VALIDATION
+
+    # Check token life.
+    if not validator.alive_token(user_name, totp_token):
         return ERROR_INVALID_2FA
+
+    # Do operation and return.
     dao_message.delete_message(message_id)
     return SUCCESS_MESSAGE_DELETE
 
@@ -92,9 +94,16 @@ def delete_message(user_name, totp_token, message_id):
 # Delete all entries.
 @app.route('/user/<user_name>/2fa/<totp_token>/message/', methods=['DELETE'])
 def delete_all_messages(user_name, totp_token):
-    if not token_valid(user_name, totp_token):
-        # TODO Redirect to error code.
+    # Input validation.
+    if not (validator.user_name_valid(user_name)
+            and validator.totp_valid(totp_token)):
+        return ERROR_VALIDATION
+
+    # Check if token is alive.
+    if not validator.alive_token(user_name, totp_token):
         return ERROR_INVALID_2FA
+
+    # Do operation then return.
     dao_message.delete_all_messages(user_name)
     return SUCCESS_MESSAGE_DELETE_ALL + user_name
 
@@ -102,6 +111,14 @@ def delete_all_messages(user_name, totp_token):
 # Add entry.
 @app.route('/user/<receiver_user_name>/sender/<sender_user_name>/2fa/<totp_token>/message/', methods=['POST'])
 def post_message(receiver_user_name, sender_user_name, totp_token):
+    # Input validation.
+    content = json_util.Binary.decode(request.data)
+    if not (validator.user_name_valid(receiver_user_name)
+            and validator.user_name_valid(sender_user_name)
+            and validator.totp_valid(totp_token)
+            and validator.content_valid(content)):
+        return ERROR_VALIDATION
+
     # Check if receiver exists.
     if not dao_user.user_exists(receiver_user_name):
         return ERROR_N0_USER + receiver_user_name
@@ -111,12 +128,10 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
         return ERROR_N0_USER + sender_user_name
 
     # Check if valid 2FA.
-    if not token_valid(sender_user_name, totp_token):
-        # TODO Redirect to error code.
+    if not validator.alive_token(sender_user_name, totp_token):
         return ERROR_INVALID_2FA
 
-    # Do operation.
-    content = json_util.Binary.decode(request.data)
+    # Do operation and return.
     dao_message.post_message(sender_user_name, receiver_user_name, content)
     return SUCCESS_MESSAGE_SENT
 
@@ -132,6 +147,22 @@ def post_message(receiver_user_name, sender_user_name, totp_token):
 #     content = request.data
 #     dao_message.post_message("anon", receiver_user_name, content)
 #     return SUCCESS_MESSAGE_SENT
+
+
+# Get entry.
+# @app.route('/user/<user_name>/2fa/<totp_token>/message/<message_id>', methods=['GET'])
+# def get_message(user_name, totp_token, message_id):
+#     # Input validation.
+#     if not (validator.user_name_valid(user_name)
+#             and validator.totp_valid(totp_token)
+#             and validator.message_id_valid(message_id)):
+#         return ERROR_VALIDATION
+#
+#     # Check token life.
+#     if not validator.alive_token(user_name, totp_token):
+#         return ERROR_INVALID_2FA
+#     message = dao_message.get_message(message_id)
+#     return str(message)
 
 
 if __name__ == '__main__':

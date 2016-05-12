@@ -54,11 +54,12 @@ angular.module('NoMsg.messagegetall', ['ngRoute'])
 
             // If response was error,
             // display the text rather than displaying the table.
-            if(responseData.indexOf("Error:") == -1){
+            if(responseData.indexOf("Error:") == -1 && responseData.indexOf("Note:") == -1){
                 $scope.responseText = "";
                 $scope.responseData = responseData;
             } else {
                 $scope.responseText = responseData;
+                $scope.responseData = "";
             }
         });
     };
