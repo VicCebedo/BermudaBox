@@ -9,16 +9,16 @@
             <form role="form">
                 <div class="form-group">
                     <label for="inputSender">Sender:</label>
-                    <input type="text" class="form-control" id="inputSender" ng-model="inputSender"/>
+                    <input type="text" class="form-control" id="inputSender" ng-model="inputSender" maxLength="16"/>
 
                     <label for="inputReceiver">Receiver:</label>
-                    <input type="text" class="form-control" id="inputReceiver" ng-model="inputReceiver"/>
+                    <input type="text" class="form-control" id="inputReceiver" ng-model="inputReceiver" maxLength="16"/>
 
                     <label for="inputContent">Content:</label>
-                    <textarea class="form-control" id="inputContent" ng-model="inputContent"></textarea>
+                    <textarea class="form-control" id="inputContent" ng-model="inputContent" maxLength="300"></textarea>
 
                     <label for="input2fa">2FA:</label>
-                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa"/>
+                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa" maxLength="16"/>
                 </div>
                 <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">Send</button>
             </form>

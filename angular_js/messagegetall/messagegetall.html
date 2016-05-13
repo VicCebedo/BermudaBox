@@ -9,10 +9,10 @@
             <form role="form">
                 <div class="form-group">
                     <label for="inputUsername">Username:</label>
-                    <input type="text" class="form-control" id="inputUsername" ng-model="inputUsername"/>
+                    <input type="text" class="form-control" id="inputUsername" ng-model="inputUsername" maxLength="16"/>
 
                     <label for="input2fa">2FA:</label>
-                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa"/>
+                    <input type="text" class="form-control" id="input2fa" ng-model="input2fa" maxLength="16"/>
                 </div>
                 <button class="btn btn-success" id="buttonSubmit" ng-click="submit()">View Messages</button>
                 <button class="btn btn-danger" id="buttonDeleteAll" ng-click="deleteAll()">Delete All</button>
